@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace WearMatcher.Models
 {
@@ -9,17 +10,10 @@ namespace WearMatcher.Models
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public string Category { get; set; }
+        public string ImgPath { get; set; }
 
-        public List<MatchingItems> MatchingItems { get; set; }
-    }
-
-    public class MatchingItems
-    {
-        public int ItemId { get; set; }
-        public virtual ClothingItem Item { get; set; }
-
-        public int MatchingItemId { get; set; }
-        public virtual ClothingItem MatchingItem { get; set; }
+        public List<Tag> Tags { get; set; }
+        public List<ClothingItem> MatchingItems { get; set; }
+        public List<MatchingItemsPair> ItemItem { get; set; }
     }
 }
