@@ -8,6 +8,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using WearMatcher.Data;
 
 namespace WearMatcher
 {
@@ -24,6 +26,9 @@ namespace WearMatcher
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+
+            services.AddDbContext<WearMatcherContext>(options =>
+                    options.UseNpgsql(Configuration.GetConnectionString("WearMatcherContext")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,6 +56,8 @@ namespace WearMatcher
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+                endpoints.MapControllers();
             });
         }
     }
