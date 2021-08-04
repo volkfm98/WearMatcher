@@ -105,7 +105,7 @@ namespace WearMatcher.Migrations
                         .IsRequired();
 
                     b.HasOne("WearMatcher.Models.ClothingItem", "SecondItem")
-                        .WithMany()
+                        .WithMany("ItemItemReversed")
                         .HasForeignKey("SecondItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -118,6 +118,8 @@ namespace WearMatcher.Migrations
             modelBuilder.Entity("WearMatcher.Models.ClothingItem", b =>
                 {
                     b.Navigation("ItemItem");
+
+                    b.Navigation("ItemItemReversed");
                 });
 #pragma warning restore 612, 618
         }

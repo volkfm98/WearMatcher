@@ -9,7 +9,7 @@ using WearMatcher.Data;
 namespace WearMatcher.Migrations
 {
     [DbContext(typeof(WearMatcherContext))]
-    [Migration("20210720170957_Init")]
+    [Migration("20210731203704_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -107,7 +107,7 @@ namespace WearMatcher.Migrations
                         .IsRequired();
 
                     b.HasOne("WearMatcher.Models.ClothingItem", "SecondItem")
-                        .WithMany()
+                        .WithMany("ItemItemReversed")
                         .HasForeignKey("SecondItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -120,6 +120,8 @@ namespace WearMatcher.Migrations
             modelBuilder.Entity("WearMatcher.Models.ClothingItem", b =>
                 {
                     b.Navigation("ItemItem");
+
+                    b.Navigation("ItemItemReversed");
                 });
 #pragma warning restore 612, 618
         }

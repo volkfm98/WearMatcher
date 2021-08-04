@@ -13,7 +13,11 @@ namespace WearMatcher.Models
         public string ImgPath { get; set; }
 
         public List<Tag> Tags { get; set; }
+     
         public List<ClothingItem> MatchingItems { get; set; }
+        public List<ClothingItem> MatchingItemsReversed { get; set; }
+
         public List<MatchingItemsPair> ItemItem { get; set; }
+        public List<MatchingItemsPair> ItemItemReversed { get; set; }
     }
 }

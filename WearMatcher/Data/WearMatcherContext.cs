@@ -22,18 +22,17 @@ namespace WearMatcher.Data
             modelBuilder
                 .Entity<ClothingItem>()
                 .HasMany(i => i.MatchingItems)
-                .WithMany(i => i.MatchingItems)
+                .WithMany(i => i.MatchingItemsReversed)
                 .UsingEntity<MatchingItemsPair>(
                     j => j
                         .HasOne(ip => ip.FirstItem)
                         .WithMany(i => i.ItemItem)
                         .HasForeignKey(ip => ip.FirstItemId),
                     j => j
-                        .HasOne(ip => ip.FirstItem)
-                        .WithMany(i => i.ItemItem)
-                        .HasForeignKey(ip => ip.FirstItemId),
-                    j => j.HasKey(t => new { t.FirstItemId, t.SecondItemId })
-                );
+                        .HasOne(ip => ip.SecondItem)
+                        .WithMany(i => i.ItemItemReversed)
+                        .HasForeignKey(ip => ip.SecondItemId),
+                    j => j.HasKey(t => new { t.FirstItemId, t.SecondItemId }));
         }
     }
 }
