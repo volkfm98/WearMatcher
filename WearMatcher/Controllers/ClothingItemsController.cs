@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using WearMatcher.Data;
@@ -26,31 +25,32 @@ namespace WearMatcher.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> Get([FromRoute] int id)
         {
-            ClothingItem item = await _context.ClothingItem.FindAsync(id);
+            ClothingItem item =
+                await _context
+                .ClothingItem
+                .Include(i => i.Tags)
+                .Include(i => i.MatchingItems)
+                .FirstOrDefaultAsync(i => i.Id == id);
 
             if (item != null)
             {
-                return new OkObjectResult(new ClothingItemViewModel(item));
+                return new OkObjectResult(new ClothingItemFullViewModel(item));
             }
 
             return BadRequest();
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] string search, [FromQuery] List<int> tagIds)
+        public async Task<IActionResult> Get([FromQuery] string search = "")
         {
-            if (search == null)
-            {
-                search = "";
-            }
-
             List<ClothingItem> items =
                 await _context.ClothingItem
                 .Where(i => i.Name.Contains(search))
-                //&& i.Tags.Any(t1 => tagIds.All(t2 => t1.Id == t2))
+                .Include(i => i.Tags)
+                .Include(i => i.MatchingItems)
                 .ToListAsync();
 
-            List<ClothingItemViewModel> viewModel = new();
+            List<ClothingItemFullViewModel> viewModel = new();
 
             foreach (var item in items)
             {
@@ -66,61 +66,36 @@ namespace WearMatcher.Controllers
         [HttpPost]
         // [ValidateAntiForgeryToken]
         // TODO: Should see how to use it in React with ASP
-        public async Task<IActionResult> Create([FromForm, Bind("Name")] ClothingItem clothingItem, [FromForm] IFormFile clothingImg, [FromForm] List<int> itemIds, [FromForm] List<int> tagIds)
+        public async Task<IActionResult> Create([FromForm] ClothingItemFullViewModel viewModel, [FromForm] IFormFile clothingImg)
         {
             if (ModelState.IsValid)
             {
-                if (clothingItem.Tags == null)
-                {
-                    clothingItem.Tags = new();
-                }
+                ClothingItem item = await viewModel.Reflect(_context);
 
-                if(clothingItem.MatchingItems == null)
-                {
-                    clothingItem.MatchingItems = new();
-                }
-
-                foreach (var tag in await _context.Tag.Where(t => tagIds.Contains(t.Id)).ToListAsync())
-                {
-                    clothingItem.Tags.Add(tag);
-                }
-
-                foreach (var matchingItem in await _context.ClothingItem.Where(i => itemIds.Contains(i.Id)).ToListAsync())
-                {
-                    clothingItem.MatchingItems.Add(matchingItem);
-                }
-                _context.Add(clothingItem);
+                _context.Add(item);
+                _context.ChangeTracker.DetectChanges();
+                Console.WriteLine(_context.ChangeTracker.DebugView.LongView);
                 await _context.SaveChangesAsync();
-                return CreatedAtAction("Get", clothingItem.Id, new ClothingItemViewModel(clothingItem));
+
+                return CreatedAtAction("Get", item.Id, new ClothingItemFullViewModel(item));
             }
+
             return BadRequest();
         }
 
         // POST: ClothingItems/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost("{id}")]
+        [HttpPost]
         //[ValidateAntiForgeryToken]
-        public async Task<IActionResult> Update([FromRoute] int id, [FromForm, Bind("Id, Name, Tags, MatchingItems")] ClothingItem clothingItem)
+        public async Task<IActionResult> Update([FromForm] ClothingItemFullViewModel itemViewModel)
         {
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(clothingItem);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ClothingItemExists(clothingItem.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                ClothingItem item = await itemViewModel.Reflect(_context);
+
+                _context.Update(item);
+                await _context.SaveChangesAsync();
 
                 return new OkObjectResult("ClothingItem was successfully updated");
             }
@@ -142,11 +117,6 @@ namespace WearMatcher.Controllers
             }
 
             return BadRequest();
-        }
-
-        private bool ClothingItemExists(int id)
-        {
-            return _context.ClothingItem.Any(e => e.Id == id);
         }
     }
 }
