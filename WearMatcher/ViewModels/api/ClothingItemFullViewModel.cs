@@ -14,8 +14,8 @@ namespace WearMatcher.ViewModels.api
         public string Name { get; set; }
         public string ImgPath { get; set; }
 
-        public List<int> Tags { get; set; }
-        public List<int> MatchingItems { get; set; }
+        public List<int> TagIds { get; set; }
+        public List<int> MatchingItemIds { get; set; }
 
         public ClothingItemFullViewModel() {}
 
@@ -26,10 +26,10 @@ namespace WearMatcher.ViewModels.api
             this.ImgPath = item.ImgPath;
 
             if (item.Tags != null)
-                this.Tags = item.Tags.Select(t => t.Id).ToList();
+                this.TagIds = item.Tags.Select(t => t.Id).ToList();
 
             if (item.MatchingItems != null)
-                this.MatchingItems = item.MatchingItems.Select(i => i.Id).ToList();
+                this.MatchingItemIds = item.MatchingItems.Select(i => i.Id).ToList();
         }
 
         public async Task<ClothingItem> Reflect(WearMatcherContext context)
@@ -40,8 +40,8 @@ namespace WearMatcher.ViewModels.api
             item.Name = this.Name;
             item.ImgPath = this.ImgPath;
 
-            item.Tags = await context.Tag.Where(t => this.Tags.Contains(t.Id)).ToListAsync();
-            item.MatchingItems = await context.ClothingItem.Where(i => this.MatchingItems.Contains(i.Id)).ToListAsync();
+            item.Tags = await context.Tag.Where(t => this.TagIds.Contains(t.Id)).ToListAsync();
+            item.MatchingItems = await context.ClothingItem.Where(i => this.MatchingItemIds.Contains(i.Id)).ToListAsync();
 
             return item;
         }
