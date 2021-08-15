@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.EntityFrameworkCore;
 using WearMatcher.Data;
 using WearMatcher.Models;
@@ -13,6 +14,7 @@ namespace WearMatcher.Controllers
 {
     [ApiController]
     [Route("{controller}/{action}/")]
+    [EnableCors("ClothingItemsController")]
     public class ClothingItemsController : Controller
     {
         private readonly WearMatcherContext _context;
